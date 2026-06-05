@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TALLORA — Legal Time &amp; Billing Automation (Pilot Edition)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f1b2d; --ink-2:#1c3050; --navy:#16345c; --navy-soft:#22487a;
+  --paper:#f4f0e7; --paper-2:#eae3d4; --card:#ffffff;
+  --line:#dfd6c4; --line-soft:#ece6d9;
+  --gold:#b8893b; --gold-soft:#d9b878;
+  --green:#2f7d5b; --green-soft:#e2f0e8;
+  --red:#b4452f; --red-soft:#f6e3dd;
+  --blue:#2c5d8f; --blue-soft:#e3edf6;
+  --muted:#6b6453; --muted-2:#938b76;
+  --shadow:0 1px 2px rgba(15,27,45,.06),0 8px 24px rgba(15,27,45,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  display:flex; min-height:100vh;
+  background-image:radial-gradient(circle at 1px 1px, rgba(15,27,45,.035) 1px, transparent 0);
+  background-size:22px 22px;
+}
+.serif{font-family:'Fraunces',serif;}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width:256px; flex-shrink:0; background:var(--ink); color:#e9e3d4;
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  border-right:1px solid #000; overflow-y:auto;
+}
+.brand{padding:24px 24px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand h1{font-family:'Fraunces',serif;font-size:25px;font-weight:700;letter-spacing:1px;color:#fff;display:flex;align-items:baseline;gap:2px}
+.brand h1 .dot{color:var(--gold-soft)}
+.brand p{font-size:11px;color:#9aa7b8;margin-top:5px;letter-spacing:.3px}
+.brand .pilot-tag{margin-top:9px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.5px;color:#1a1206;background:var(--gold-soft);padding:3px 9px;border-radius:20px}
+.nav{padding:12px 12px 6px;flex:1}
+.nav .grp{font-size:10px;font-weight:700;letter-spacing:1px;color:#6b7787;padding:12px 14px 6px;text-transform:uppercase}
+.nav a{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;
+  color:#bcc6d4;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:.18s;margin-bottom:2px;border:1px solid transparent;
+}
+.nav a .ic{width:18px;text-align:center;font-size:15px;opacity:.85}
+.nav a:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav a.active{background:var(--navy);color:#fff;border-color:rgba(217,184,120,.35)}
+.nav a.active .ic{opacity:1}
+.nav .badge{margin-left:auto;background:var(--gold);color:#1a1206;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px}
+.nav .badge.green{background:var(--green);color:#fff}
+.privacy{margin:8px 12px 12px;padding:12px 14px;background:rgba(47,125,91,.14);border:1px solid rgba(120,200,160,.25);border-radius:11px}
+.privacy .t{font-size:12px;font-weight:600;color:#9fe0c0;display:flex;align-items:center;gap:6px}
+.privacy p{font-size:11px;color:#a7b2bf;margin-top:6px;line-height:1.55}
+.userbox{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.userrow{display:flex;align-items:center;gap:11px}
+.avatar{width:34px;height:34px;border-radius:9px;background:var(--gold);color:#1a1206;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Fraunces',serif}
+.userbox .nm{font-size:13px;font-weight:600;color:#fff}
+.userbox .rl{font-size:11px;color:#9aa7b8}
+.role-sel{margin-top:11px}
+.role-sel label{font-size:10px;color:#6b7787;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.role-sel select{width:100%;margin-top:5px;font-family:inherit;font-size:12.5px;padding:7px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:#16243a;color:#e9e3d4}
+.role-sel select:focus{outline:none;border-color:var(--gold-soft)}
+
+/* ---------- Main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{
+  padding:18px 36px;display:flex;align-items:center;gap:18px;
+  border-bottom:1px solid var(--line);background:rgba(244,240,231,.85);backdrop-filter:blur(6px);
+  position:sticky;top:0;z-index:30;
+}
+.topbar .ttl{font-family:'Fraunces',serif;font-size:23px;font-weight:600}
+.topbar .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.lang{display:flex;background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.lang button{font-family:inherit;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--muted);padding:7px 11px;cursor:pointer;transition:.15s;border-right:1px solid var(--line)}
+.lang button:last-child{border-right:none}
+.lang button.on{background:var(--ink);color:#fff}
+.lang button.soon{opacity:.55}
+.pill{font-size:12px;padding:6px 13px;border-radius:30px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-weight:500;display:flex;align-items:center;gap:6px}
+.pill .d{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.btn{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-size:13.5px;font-weight:600;padding:9px 16px;transition:.16s;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{background:var(--navy)}
+.btn-gold{background:var(--gold);color:#231603}
+.btn-gold:hover{background:#a87a30}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink-2)}
+.btn-ghost:hover{background:var(--paper-2)}
+.btn-sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+.content{padding:30px 36px 60px;max-width:1180px;width:100%}
+.view{display:none;animation:fade .4s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes slidedown{from{opacity:0;max-height:0}to{opacity:1;max-height:420px}}
+
+.section-h{font-family:'Fraunces',serif;font-size:16px;font-weight:600;margin:28px 0 14px;display:flex;align-items:center;gap:9px}
+.section-h:first-child{margin-top:0}
+.section-h .ln{flex:1;height:1px;background:var(--line)}
+.section-h .cnt{font-size:12px;color:var(--muted);font-weight:400;font-family:'IBM Plex Sans'}
+.lead{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6;max-width:740px}
+.lead b{color:var(--ink-2);font-weight:600}
+
+/* ---------- KPI ---------- */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:var(--paper-2);opacity:.5}
+.kpi .lbl{font-size:12px;color:var(--muted);font-weight:500;position:relative}
+.kpi .val{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-top:7px;position:relative;letter-spacing:-.5px}
+.kpi .val small{font-size:15px;color:var(--muted-2)}
+.kpi .chg{font-size:12px;margin-top:7px;font-weight:600;position:relative;display:flex;align-items:center;gap:5px}
+.up{color:var(--green)} .down{color:var(--red)}
+.kpi.alert{background:linear-gradient(180deg,#fff,#fbf4f1)}
+.kpi.alert .val{color:var(--red)}
+
+/* ---------- Goal tracker ---------- */
+.goal{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 22px;margin-top:18px;display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.goal .gt{flex:1;min-width:240px}
+.goal .gt .h{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.goal .gt .h .who{font-size:11.5px;color:var(--muted);font-weight:500}
+.gbar{height:12px;border-radius:8px;background:var(--paper-2);margin-top:11px;overflow:hidden;position:relative}
+.gbar .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--navy),var(--green));transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.gbar .marker{position:absolute;top:-3px;width:2px;height:18px;background:var(--ink);opacity:.5}
+.goal .gnum{font-size:11.5px;color:var(--muted);margin-top:7px;display:flex;justify-content:space-between}
+.goal .gnext{background:var(--green-soft);border:1px solid var(--green);border-radius:11px;padding:13px 16px;max-width:300px}
+.goal .gnext .l{font-size:10.5px;font-weight:700;letter-spacing:.5px;color:var(--green);text-transform:uppercase}
+.goal .gnext .t{font-size:12.5px;color:var(--ink-2);margin-top:5px;line-height:1.5;font-weight:500}
+
+.two-col{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-h{padding:17px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.card-h .ti{font-weight:600;font-size:14.5px}
+.card-h .ds{font-size:11.5px;color:var(--muted);margin-top:2px}
+.card-b{padding:18px 20px}
+
+/* ---------- Bar chart ---------- */
+.chart{display:flex;align-items:flex-end;gap:14px;height:170px;padding-top:10px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+.bar-stack{width:60%;max-width:38px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:height 1s cubic-bezier(.2,.8,.2,1)}
+.bar.billed{background:var(--navy)}
+.bar.gap{background:repeating-linear-gradient(45deg,var(--red-soft),var(--red-soft) 4px,#fff 4px,#fff 8px);border:1px solid var(--red);border-bottom:none;border-radius:4px 4px 0 0}
+.bar-lbl{font-size:11px;color:var(--muted)}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--muted);margin-top:12px;justify-content:center}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+/* ---------- Insight list ---------- */
+.insight{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line-soft)}
+.insight:last-child{border-bottom:none}
+.insight .ico{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.ico.warn{background:var(--red-soft);color:var(--red)}
+.ico.ok{background:var(--green-soft);color:var(--green)}
+.ico.info{background:var(--blue-soft);color:var(--blue)}
+.ico.due{background:#fbf6ec;color:var(--gold)}
+.insight .tx{font-size:13px;font-weight:600;line-height:1.4}
+.insight .mt{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.insight .act{margin-top:7px}
+
+/* ---------- Capture feed ---------- */
+.capture-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:13px;box-shadow:var(--shadow);animation:pop .35s ease}
+.capture-card.dismissed{opacity:.45;filter:grayscale(.5)}
+.capture-card.private{border-color:var(--gold-soft);background:linear-gradient(180deg,#fff,#fdfaf3)}
+.cap-top{display:flex;align-items:flex-start;gap:13px}
+.src-ic{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.src-email{background:#c0504d} .src-cal{background:#3a7bd5} .src-doc{background:#4a8f6f} .src-call{background:#7b5ea7} .src-voice{background:#c98a2b}
+.cap-meta{flex:1;min-width:0}
+.cap-title{font-size:14px;font-weight:600;line-height:1.4}
+.cap-sub{font-size:12px;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:5px 12px}
+.cap-sub b{color:var(--ink-2);font-weight:500}
+.cap-dur{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--navy);text-align:right;white-space:nowrap}
+.cap-dur small{display:block;font-size:10px;color:var(--muted);font-weight:400;font-family:'IBM Plex Sans'}
+.match{margin-top:13px;padding:12px 14px;background:var(--paper);border:1px solid var(--line-soft);border-radius:10px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.match .ai{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.5px;display:flex;align-items:center;gap:5px}
+.match .matter{font-size:13px;font-weight:600}
+.match .client{font-size:12px;color:var(--muted)}
+.conf{margin-left:auto;display:flex;align-items:center;gap:8px}
+.conf-bar{width:70px;height:6px;background:var(--paper-2);border-radius:6px;overflow:hidden}
+.conf-fill{height:100%;background:var(--green);border-radius:6px}
+.conf-pct{font-size:12px;font-weight:700;color:var(--green)}
+.conf-pct.mid{color:var(--gold)}
+.tags{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--blue-soft);color:var(--blue);font-weight:500}
+.tag.code{background:var(--paper-2);color:var(--ink-2)}
+.cap-actions{display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.cap-actions .spacer{flex:1}
+
+/* ---------- Privacy / consent toggle ---------- */
+.consent{margin-top:12px;display:flex;align-items:center;gap:10px;padding:10px 13px;background:#fbf6ec;border:1px dashed var(--gold-soft);border-radius:10px;flex-wrap:wrap}
+.consent .lk{font-size:11.5px;color:#7a5a1f;font-weight:600;display:flex;align-items:center;gap:6px;flex:1;min-width:200px}
+.seg{display:flex;background:var(--paper-2);border-radius:8px;padding:3px;gap:3px}
+.seg button{font-family:inherit;border:none;background:transparent;font-size:11.5px;font-weight:600;color:var(--muted);padding:5px 11px;border-radius:6px;cursor:pointer;transition:.15s}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.seg button.on.share{color:var(--green)}
+.seg button.on.priv{color:var(--gold)}
+
+/* ---------- Timesheet ---------- */
+.ts-group{margin-bottom:22px}
+.ts-group-h{display:flex;align-items:center;gap:11px;padding:11px 16px;background:var(--ink);color:#fff;border-radius:11px 11px 0 0}
+.ts-group-h .mn{font-weight:600;font-size:14px}
+.ts-group-h .cl{font-size:12px;color:#aebccd}
+.ts-group-h .tot{margin-left:auto;font-family:'Fraunces',serif;font-weight:600;font-size:15px}
+.ts-entry{background:var(--card);border:1px solid var(--line);border-top:none;padding:15px 18px}
+.ts-entry:last-child{border-radius:0 0 11px 11px}
+.ts-entry-top{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin-bottom:9px}
+.ts-entry-top .dt{font-weight:600;color:var(--ink-2)}
+.ts-entry-top .dur{margin-left:auto;font-family:'Fraunces',serif;font-size:15px;color:var(--navy);font-weight:600}
+.ts-entry-top .amt{font-family:'Fraunces',serif;font-size:15px;color:var(--green);font-weight:600;min-width:78px;text-align:right}
+.narrative{font-size:13px;line-height:1.65;color:var(--ink-2);background:var(--paper);border:1px solid var(--line-soft);border-left:3px solid var(--gold);border-radius:7px;padding:11px 14px;margin-top:4px}
+.narrative[contenteditable]:focus{outline:none;border-left-color:var(--navy);box-shadow:0 0 0 2px var(--blue-soft)}
+.nar-tools{display:flex;gap:7px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.nar-tools .lab{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:5px}
+.chip{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;color:var(--ink-2);font-family:inherit;transition:.15s}
+.chip:hover{background:var(--paper-2)}
+.chip.gen{border-color:var(--gold-soft);color:var(--gold);background:#fdf8ef}
+.chip.gen:hover{background:#f7eed9}
+.chip.xai{margin-left:auto;border-color:var(--blue-soft);color:var(--blue);background:var(--blue-soft)}
+
+/* ---------- Explainability panel ---------- */
+.xai-panel{margin-top:11px;border:1px solid var(--blue-soft);background:#f3f8fc;border-radius:10px;padding:14px 16px;overflow:hidden;animation:slidedown .3s ease}
+.xai-panel .xh{font-size:12px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.xai-row{display:flex;gap:10px;font-size:12px;padding:7px 0;border-bottom:1px solid #e1ecf5;color:var(--ink-2)}
+.xai-row:last-child{border-bottom:none}
+.xai-row .k{color:var(--muted);min-width:118px;font-weight:600}
+.xai-row .v{flex:1;line-height:1.5}
+.xai-src{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #d5e3ef;border-radius:7px;padding:3px 9px;font-size:11.5px;margin:2px 4px 2px 0}
+.xai-note{margin-top:10px;font-size:11px;color:#7a5a1f;background:#fbf6ec;border:1px solid var(--gold-soft);border-radius:8px;padding:9px 11px;line-height:1.55}
+
+/* ---------- Invoice ---------- */
+.inv-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11.5px;color:var(--muted);font-weight:600}
+.field select,.field input{font-family:inherit;font-size:13.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);min-width:150px}
+.field select:focus,.field input:focus{outline:none;border-color:var(--navy)}
+.invoice{background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);overflow:hidden}
+.inv-head{padding:26px 30px;background:var(--ink);color:#fff;display:flex;justify-content:space-between;align-items:flex-start}
+.inv-head .logo{font-family:'Fraunces',serif;font-size:22px;font-weight:700}
+.inv-head .logo .dot{color:var(--gold-soft)}
+.inv-head .meta{text-align:right;font-size:12px;color:#aebccd;line-height:1.7}
+.inv-head .meta b{color:#fff;font-weight:600}
+.inv-to{padding:20px 30px;display:flex;justify-content:space-between;border-bottom:1px solid var(--line);font-size:13px}
+.inv-to .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.inv-to b{font-size:14px}
+table.lines{width:100%;border-collapse:collapse;font-size:13px}
+table.lines th{text-align:left;padding:12px 30px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--line);background:var(--paper)}
+table.lines td{padding:13px 30px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+table.lines td.num{text-align:right;font-family:'Fraunces',serif;white-space:nowrap}
+table.lines .desc{color:var(--ink-2);line-height:1.5}
+table.lines .code{font-size:11px;color:var(--muted)}
+.inv-sum{padding:20px 30px;display:flex;justify-content:flex-end}
+.inv-sum table{font-size:13.5px}
+.inv-sum td{padding:6px 0 6px 40px;text-align:right}
+.inv-sum td.l{color:var(--muted);text-align:left;padding-left:0}
+.inv-sum .total td{font-family:'Fraunces',serif;font-size:20px;font-weight:600;border-top:2px solid var(--ink);padding-top:12px;color:var(--ink)}
+.inv-foot{padding:16px 30px;background:var(--paper);font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--line)}
+
+.roi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.roi-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow);text-align:center}
+.roi-card .v{font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--navy)}
+.roi-card .l{font-size:12px;color:var(--muted);margin-top:5px}
+.roi-card.hl{background:var(--green-soft);border-color:var(--green)}
+.roi-card.hl .v{color:var(--green)}
+
+/* ---------- Integrations ---------- */
+.int-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.int{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:11px}
+.int.addon{border-style:dashed;background:#fbfaf6}
+.int-top{display:flex;align-items:center;gap:11px}
+.int-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Fraunces',serif;font-size:16px;color:#fff;flex-shrink:0}
+.int-nm{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px}
+.int-nm .opt{font-size:9.5px;font-weight:700;letter-spacing:.5px;color:var(--gold);background:#fbf6ec;border:1px solid var(--gold-soft);border-radius:20px;padding:1px 7px}
+.int-cat{font-size:11px;color:var(--muted);margin-top:1px}
+.int-desc{font-size:12px;color:var(--muted);line-height:1.55;flex:1}
+.int-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sync{font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
+.sync.on{color:var(--green)} .sync.off{color:var(--muted-2)}
+.switch{position:relative;width:42px;height:23px;border-radius:20px;background:var(--paper-2);cursor:pointer;transition:.2s;border:1px solid var(--line);flex-shrink:0}
+.switch.on{background:var(--green)}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch.on::after{left:21px}
+
+/* ---------- Pilot report ---------- */
+.pilot-hero{background:linear-gradient(135deg,var(--ink),var(--navy));color:#fff;border-radius:var(--radius);padding:26px 30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.pilot-hero::after{content:'';position:absolute;right:-40px;bottom:-40px;width:180px;height:180px;border-radius:50%;background:rgba(217,184,120,.12)}
+.pilot-hero .eyebrow{font-size:11px;letter-spacing:1.5px;color:var(--gold-soft);font-weight:700;text-transform:uppercase}
+.pilot-hero h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-top:8px;line-height:1.3;position:relative}
+.pilot-hero p{font-size:13px;color:#bcc6d4;margin-top:10px;max-width:580px;line-height:1.6;position:relative}
+.pilot-hero .meta{margin-top:16px;display:flex;gap:22px;flex-wrap:wrap;position:relative}
+.pilot-hero .meta div .l{font-size:11px;color:#9aa7b8}
+.pilot-hero .meta div .v{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-top:2px}
+
+.ba-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.ba{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 20px;box-shadow:var(--shadow)}
+.ba .lbl{font-size:12px;color:var(--muted);font-weight:600}
+.ba .row{display:flex;align-items:baseline;justify-content:space-between;margin-top:12px}
+.ba .before{font-size:14px;color:var(--muted-2);text-decoration:line-through}
+.ba .arrow{color:var(--gold);font-size:14px}
+.ba .after{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--green)}
+.ba .delta{margin-top:8px;font-size:12px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:5px}
+
+.attorney-tbl{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow)}
+.attorney-tbl th{text-align:left;padding:13px 18px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;background:var(--paper);border-bottom:1px solid var(--line)}
+.attorney-tbl td{padding:13px 18px;border-bottom:1px solid var(--line-soft)}
+.attorney-tbl tr:last-child td{border-bottom:none}
+.attorney-tbl td.num{text-align:right;font-family:'Fraunces',serif;font-weight:600}
+.attorney-tbl .pos{color:var(--green)}
+.testimonial{margin-top:20px;background:#fbf6ec;border:1px solid var(--gold-soft);border-left:4px solid var(--gold);border-radius:11px;padding:18px 22px}
+.testimonial .q{font-family:'Fraunces',serif;font-style:italic;font-size:15px;line-height:1.6;color:var(--ink-2)}
+.testimonial .by{font-size:12px;color:var(--muted);margin-top:10px;font-weight:600}
+
+/* ---------- Audit / security ---------- */
+.audit-list{background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);overflow:hidden}
+.audit-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line-soft);font-size:12.5px}
+.audit-row:last-child{border-bottom:none}
+.audit-row .tm{font-family:'Fraunces',serif;color:var(--muted);min-width:118px;font-size:12px}
+.audit-row .ev{flex:1}
+.audit-row .ev b{font-weight:600;color:var(--ink-2)}
+.audit-row .who{font-size:11.5px;color:var(--muted)}
+.audit-row .badge2{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
+.b-share{background:var(--green-soft);color:var(--green)}
+.b-priv{background:#fbf6ec;color:var(--gold)}
+.b-edit{background:var(--blue-soft);color:var(--blue)}
+.b-del{background:var(--red-soft);color:var(--red)}
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.set{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px}
+.set .txt{flex:1}
+.set .txt .t{font-size:13.5px;font-weight:600}
+.set .txt .d{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.comp-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.cbadge{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;flex:1;min-width:160px}
+.cbadge .ic2{width:36px;height:36px;border-radius:9px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:16px}
+.cbadge .nm2{font-size:13px;font-weight:700}
+.cbadge .st2{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* role matrix */
+.rbac{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow)}
+.rbac th{text-align:left;padding:12px 16px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;background:var(--paper);border-bottom:1px solid var(--line)}
+.rbac th.c,.rbac td.c{text-align:center}
+.rbac td{padding:11px 16px;border-bottom:1px solid var(--line-soft)}
+.rbac tr:last-child td{border-bottom:none}
+.rbac .yes{color:var(--green);font-weight:700}
+.rbac .no{color:var(--muted-2)}
+.rbac tr.curr{background:#fbf6ec}
+
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty .e-ic{font-size:36px;opacity:.4}
+.empty p{margin-top:10px;font-size:14px}
+.disclaimer{margin-top:26px;padding:14px 18px;background:#fbf6ec;border:1px solid var(--gold-soft);border-radius:11px;font-size:12px;color:#7a5a1f;line-height:1.6;display:flex;gap:11px}
+.disclaimer .di{font-size:16px}
+
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:11px;font-size:13.5px;font-weight:500;box-shadow:0 10px 40px rgba(0,0,0,.25);opacity:0;transition:.3s;z-index:100;display:flex;align-items:center;gap:9px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .ti{color:var(--gold-soft)}
+
+@media(max-width:980px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .roi,.ba-grid,.int-grid,.set-grid{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .content{padding:20px}
+  .topbar{padding:16px 20px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <h1>TALLORA<span class="dot">.</span></h1>
+    <p>Legal Time &amp; Billing Automation</p>
+    <span class="pilot-tag">◆ PILOT EDITION</span>
+  </div>
+  <nav class="nav" id="nav">
+    <div class="grp">Daily Workflow</div>
+    <a data-view="dashboard" class="active"><span class="ic">◆</span> Dashboard</a>
+    <a data-view="capture"><span class="ic">⦿</span> AI Time Capture <span class="badge" id="capBadge">4</span></a>
+    <a data-view="timesheet"><span class="ic">▤</span> Timesheet</a>
+    <a data-view="invoice"><span class="ic">▦</span> Invoicing</a>
+    <div class="grp">Pilot &amp; Trust</div>
+    <a data-view="pilot"><span class="ic">◈</span> Pilot Report <span class="badge green">ROI</span></a>
+    <a data-view="integrations"><span class="ic">⇄</span> Integrations</a>
+    <a data-view="security"><span class="ic">🛡</span> Security &amp; Audit</a>
+  </nav>
+  <div class="privacy">
+    <div class="t">🔒 Privacy-First Capture</div>
+    <p>No screenshots, no keylogging — only metadata (titles, attendees, duration). The attorney chooses what to share, activity by activity.</p>
+  </div>
+  <div class="userbox">
+    <div class="userrow">
+      <div class="avatar">H</div>
+      <div>
+        <div class="nm">J. Hartwell, Esq.</div>
+        <div class="rl" id="roleLabel">Hartwell &amp; Crane LLP · Attorney</div>
+      </div>
+    </div>
+    <div class="role-sel">
+      <label>View as role (RBAC)</label>
+      <select id="roleSelect" onchange="setRole(this.value)">
+        <option value="Attorney">Attorney</option>
+        <option value="Partner">Partner</option>
+        <option value="Billing Admin">Billing Admin</option>
+      </select>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div>
+      <div class="ttl serif" id="pageTitle">Dashboard</div>
+      <div class="sub" id="pageSub">Week of May 26, 2026 · Tracking billable-time leakage in real time</div>
+    </div>
+    <div class="right">
+      <div class="lang">
+        <button class="on" onclick="setLang('EN',this)">EN</button>
+        <button class="soon" onclick="langSoon('한국어')">한국어</button>
+        <button class="soon" onclick="langSoon('日本語')">日本語</button>
+      </div>
+      <span class="pill"><span class="d"></span> Background capture on</span>
+      <button class="btn btn-gold btn-sm" onclick="simulateCapture()">＋ Simulate capture</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view active" id="dashboard">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="lbl">Hours auto-captured this week</div>
+          <div class="val">38.6<small> h</small></div>
+          <div class="chg up">▲ +9.2h vs. manual entry</div>
+        </div>
+        <div class="kpi alert">
+          <div class="lbl">Revenue at risk (time gaps)</div>
+          <div class="val">$4,120</div>
+          <div class="chg down">▼ 5.4h unreviewed · act now</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Billable-time realization</div>
+          <div class="val">94<small>%</small></div>
+          <div class="chg up">▲ 71% before → 95% target</div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">Invoice drafting time saved</div>
+          <div class="val">89<small>%</small></div>
+          <div class="chg up">▲ 14h/mo → 1.5h/mo</div>
+        </div>
+      </div>
+
+      <!-- per-attorney goal tracker -->
+      <div class="goal">
+        <div class="gt">
+          <div class="h">Monthly billable goal <span class="who">· J. Hartwell · 150h target</span></div>
+          <div class="gbar"><div class="fill" style="width:82%"></div><div class="marker" style="left:100%"></div></div>
+          <div class="gnum"><span>123.4h billed · 82% of goal</span><span>26.6h remaining</span></div>
+        </div>
+        <div class="gnext">
+          <div class="l">✦ Recommended next action</div>
+          <div class="t">Review 5.4h of unbilled time gaps to clear ~$4,120 and reach 90%+ of goal this week.</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <div class="ti">Captured vs. billed hours by day</div>
+              <div class="ds">Hatched bars are captured but not-yet-billed time gaps</div>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="chart" id="chart"></div>
+            <div class="legend">
+              <span><span class="sw" style="background:var(--navy)"></span> Billed hours</span>
+              <span><span class="sw" style="background:repeating-linear-gradient(45deg,var(--red-soft),var(--red-soft) 3px,#fff 3px,#fff 6px);border:1px solid var(--red)"></span> Time gaps (unbilled)</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div><div class="ti">AI leakage-prevention insights</div><div class="ds">Prioritized alerts from time-gap analysis</div></div></div>
+          <div class="card-b" style="padding-top:8px">
+            <div class="insight">
+              <div class="ico warn">!</div>
+              <div>
+                <div class="tx">Time gap detected — Tue 2:00–3:48 PM</div>
+                <div class="mt">No billing record after Zoom call (Acme Corp) — ~1.8h, est. $720</div>
+                <div class="act"><button class="btn btn-gold btn-sm" onclick="document.querySelector('#nav a[data-view=capture]').click()">Review gap →</button></div>
+              </div>
+            </div>
+            <div class="insight">
+              <div class="ico info">↻</div>
+              <div><div class="tx">4 recurring emails auto-grouped</div><div class="mt">Globex contract-review thread merged into one 0.6h entry</div></div>
+            </div>
+            <div class="insight">
+              <div class="ico ok">✓</div>
+              <div><div class="tx">+6.4h recovered this week</div><div class="mt">Activities you'd have missed → ~$2,560 newly billable</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- deadlines & workflow -->
+      <div class="card" style="margin-top:18px">
+        <div class="card-h"><div><div class="ti">Deadlines &amp; workflow</div><div class="ds">Matter-linked reminders so deadlines never slip — or go unbilled</div></div></div>
+        <div class="card-b" style="padding-top:8px">
+          <div class="insight">
+            <div class="ico due">⏰</div>
+            <div><div class="tx">Initech — Answer to Complaint due in 3 days (May 29)</div><div class="mt">Court filing · 6.5h logged this matter · assign reviewer before filing</div></div>
+          </div>
+          <div class="insight">
+            <div class="ico due">⏰</div>
+            <div><div class="tx">Globex — Signed redline due to opposing counsel (May 27)</div><div class="mt">Last activity 2 days ago · 1 open email thread awaiting reply</div></div>
+          </div>
+          <div class="insight">
+            <div class="ico info">📄</div>
+            <div><div class="tx">Acme — Due-diligence checklist 80% complete</div><div class="mt">3 items outstanding · client meeting scheduled Fri 10:00 AM</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-h serif">Performance vs. targets (KPIs) <span class="ln"></span> <span class="cnt">Investor metrics</span></div>
+      <div class="roi">
+        <div class="roi-card"><div class="v">$52K</div><div class="l">Monthly recurring revenue (MRR)</div></div>
+        <div class="roi-card hl"><div class="v">122%</div><div class="l">Net revenue retention (NRR)</div></div>
+        <div class="roi-card"><div class="v">7.4<span style="font-size:16px"> mo</span></div><div class="l">Avg. customer payback period</div></div>
+      </div>
+
+      <div class="disclaimer">
+        <span class="di">⚖️</span>
+        <div><b>UPL notice</b> — Tallora does not provide legal advice. It is an administrative tool that automates activity logging, time capture, and billing-narrative drafting; every billed entry is reviewed and approved by a licensed attorney. Built for GDPR · CCPA · HIPAA alignment; SOC 2 in progress (not yet certified). Figures shown in this demo are illustrative.</div>
+      </div>
+    </section>
+
+    <!-- ============ CAPTURE ============ -->
+    <section class="view" id="capture">
+      <div class="section-h serif">Activities captured by AI <span class="ln"></span> <span class="cnt" id="capCount"></span></div>
+      <p class="lead">
+        Email, calendar, document, and call activity is collected in the background, and AI auto-matches each item to a matter/client.
+        For every activity you choose <b>Share or Private</b> — private items are excluded from billing and auto-deleted locally.
+        Nothing reaches the timesheet until you <b>review and approve</b> it.
+      </p>
+      <div id="captureFeed"></div>
+    </section>
+
+    <!-- ============ TIMESHEET ============ -->
+    <section class="view" id="timesheet">
+      <div class="section-h serif">Approved timesheet <span class="ln"></span> <span class="cnt" id="tsCount"></span></div>
+      <p class="lead">
+        AI-generated billing narratives. Edit them directly, or regenerate by tone (concise / detailed / formal).
+        Open <b>"✦ AI rationale"</b> on any entry to see exactly which activities and models produced it.
+      </p>
+      <div id="tsList"></div>
+    </section>
+
+    <!-- ============ INVOICE ============ -->
+    <section class="view" id="invoice">
+      <div class="inv-controls">
+        <div class="field">
+          <label>Client / Matter</label>
+          <select id="invClient" onchange="renderInvoice()"></select>
+        </div>
+        <div class="field">
+          <label>Jurisdiction (auto tax rule)</label>
+          <select id="invJur" onchange="applyJurisdiction()">
+            <option value="us-ca">United States — California</option>
+            <option value="us-ny">United States — New York</option>
+            <option value="uk">United Kingdom (VAT 20%)</option>
+            <option value="kr">South Korea (VAT 10%)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Currency</label>
+          <select id="invCurrency" onchange="renderInvoice()">
+            <option value="USD">USD ($)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="KRW">KRW (₩)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Discount (%)</label>
+          <input type="number" id="invDiscount" value="0" min="0" max="50" oninput="renderInvoice()">
+        </div>
+        <div class="field">
+          <label>Tax / VAT (%)</label>
+          <input type="number" id="invTax" value="0" min="0" max="25" oninput="renderInvoice()">
+        </div>
+        <button class="btn btn-primary" onclick="showToast('Exported in LEDES 1998B format','📤')">Export invoice (LEDES)</button>
+      </div>
+      <div id="invoiceArea"></div>
+      <div id="invRoi"></div>
+    </section>
+
+    <!-- ============ PILOT REPORT ============ -->
+    <section class="view" id="pilot">
+      <div class="pilot-hero">
+        <div class="eyebrow">30-Day Pilot · Sample Outcome Report · Demo Data</div>
+        <h2>Hartwell &amp; Crane LLP — 30-Day Pilot Results</h2>
+        <p>This report compares the firm's baseline at pilot kickoff against day-30 performance to quantify the billable time and revenue TALLORA recovered. Export it as-is for partner reporting and reference material.</p>
+        <div class="meta">
+          <div><div class="l">Pilot window</div><div class="v">Apr 26 – May 26, 2026</div></div>
+          <div><div class="l">Attorneys enrolled</div><div class="v">5</div></div>
+          <div><div class="l">Status</div><div class="v" style="color:var(--gold-soft)">▲ Conversion review</div></div>
+        </div>
+      </div>
+
+      <div class="section-h serif">Baseline vs. result (Before → After) <span class="ln"></span></div>
+      <div class="ba-grid">
+        <div class="ba">
+          <div class="lbl">Billable-time realization rate</div>
+          <div class="row"><span class="before">71%</span><span class="arrow">→</span><span class="after">94%</span></div>
+          <div class="delta">▲ +23 pts · time gaps sharply reduced</div>
+        </div>
+        <div class="ba">
+          <div class="lbl">Added billable hours / attorney / mo</div>
+          <div class="row"><span class="before">0h</span><span class="arrow">→</span><span class="after">14.8h</span></div>
+          <div class="delta">▲ +14.8h · within the 15–30% recovery range</div>
+        </div>
+        <div class="ba">
+          <div class="lbl">Invoice drafting time (per mo)</div>
+          <div class="row"><span class="before">14h</span><span class="arrow">→</span><span class="after">1.5h</span></div>
+          <div class="delta">▲ −89% · narrative automation effect</div>
+        </div>
+      </div>
+
+      <div class="section-h serif">Revenue recovered by the pilot <span class="ln"></span> <span class="cnt">5 attorneys · 30 days</span></div>
+      <div class="roi">
+        <div class="roi-card"><div class="v">74.0h</div><div class="l">Additional billable hours recovered</div></div>
+        <div class="roi-card"><div class="v">11.0h</div><div class="l">Narrative-drafting hours saved</div></div>
+        <div class="roi-card hl"><div class="v">$29,600</div><div class="l">Revenue recovered in 30 days</div></div>
+      </div>
+
+      <div class="section-h serif">Recovery by attorney <span class="ln"></span></div>
+      <table class="attorney-tbl">
+        <thead><tr><th>Attorney</th><th style="text-align:right">Realization before</th><th style="text-align:right">After</th><th style="text-align:right">Added hrs/mo</th><th style="text-align:right">Revenue recovered</th></tr></thead>
+        <tbody>
+          <tr><td>J. Hartwell</td><td class="num">72%</td><td class="num pos">95%</td><td class="num">16.2h</td><td class="num pos">$6,480</td></tr>
+          <tr><td>M. Crane</td><td class="num">68%</td><td class="num pos">93%</td><td class="num">15.1h</td><td class="num pos">$6,795</td></tr>
+          <tr><td>D. Okafor</td><td class="num">74%</td><td class="num pos">94%</td><td class="num">13.4h</td><td class="num pos">$5,360</td></tr>
+          <tr><td>S. Reyes</td><td class="num">70%</td><td class="num pos">92%</td><td class="num">14.0h</td><td class="num pos">$5,040</td></tr>
+          <tr><td>L. Bennett</td><td class="num">71%</td><td class="num pos">95%</td><td class="num">14.3h</td><td class="num pos">$5,925</td></tr>
+        </tbody>
+      </table>
+
+      <div class="testimonial">
+        <div class="q">"I used to bleed hours every week just forgetting to start a timer. TALLORA captures it while I work. The time we recovered in the first month more than paid for the subscription."</div>
+        <div class="by">— Pilot attorney (reference-approved · sample quote)</div>
+      </div>
+
+      <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showToast('Pilot report exported as PDF','📄')">Export PDF report</button>
+        <button class="btn btn-ghost" onclick="showToast('Reference / case-study consent request sent','✦')">Request reference consent</button>
+        <button class="btn btn-gold" onclick="showToast('Conversion quote generated','💳')">Generate conversion quote</button>
+      </div>
+
+      <div class="disclaimer">
+        <span class="di">ℹ️</span>
+        <div>The figures on this page are <b>illustrative demo data</b>. In a live pilot, realization and recovered-revenue numbers are generated from each firm's actual baseline and attorney-approved entries — and only those verified figures should be used in sales or investor materials.</div>
+      </div>
+    </section>
+
+    <!-- ============ INTEGRATIONS ============ -->
+    <section class="view" id="integrations">
+      <div class="section-h serif">Integrations <span class="ln"></span> <span class="cnt" id="intCount"></span></div>
+      <p class="lead">
+        TALLORA is not locked to any single accounting or management tool. <b>Open API and two-way sync</b> let it sit on top of your
+        existing stack with no duplicate data entry. At pilot kickoff, just switch on the systems the firm already uses.
+      </p>
+      <div class="int-grid" id="intGrid"></div>
+
+      <div class="disclaimer">
+        <span class="di">🔌</span>
+        <div><b>Lowering the adoption barrier</b> — two-way (not one-way) sync means time approved in Tallora flows back into your existing PMS and accounting systems automatically. The Open API / webhooks are published, so custom integrations are possible. Contract-analysis is offered as an <b>optional add-on module</b>, not bundled into the base plan, to keep the core lean and ROI-focused.<br><br><span style="font-size:11px;opacity:.85">Clio, PracticePanther, QuickBooks, NetDocuments, Outlook, Gmail, Zoom, Xero and other product names are trademarks of their respective owners. Listing here indicates compatibility only — not partnership, sponsorship, or endorsement.</span></div>
+      </div>
+    </section>
+
+    <!-- ============ SECURITY & AUDIT ============ -->
+    <section class="view" id="security">
+      <div class="section-h serif">Compliance &amp; security posture <span class="ln"></span></div>
+      <div class="comp-badges">
+        <div class="cbadge"><div class="ic2" style="background:#fbf6ec;color:var(--gold)">◷</div><div><div class="nm2">SOC 2 Type II</div><div class="st2">In progress · not yet certified</div></div></div>
+        <div class="cbadge"><div class="ic2">✓</div><div><div class="nm2">GDPR</div><div class="st2">Aligned by design</div></div></div>
+        <div class="cbadge"><div class="ic2">✓</div><div><div class="nm2">CCPA</div><div class="st2">Aligned by design</div></div></div>
+        <div class="cbadge"><div class="ic2">✓</div><div><div class="nm2">HIPAA</div><div class="st2">Aligned by design</div></div></div>
+      </div>
+      <div class="disclaimer" style="margin-top:14px"><span class="di">ℹ️</span><div>Compliance posture is in progress and self-assessed — Tallora is <b>not yet independently certified</b>. Badges indicate design intent and current status, not completed certification.</div></div>
+
+      <div class="section-h serif">Role-based access control (RBAC) <span class="ln"></span> <span class="cnt" id="rbacCurr"></span></div>
+      <table class="rbac" id="rbacTable"></table>
+
+      <div class="section-h serif">Privacy &amp; data-retention settings <span class="ln"></span></div>
+      <div class="set-grid">
+        <div class="set">
+          <div class="txt"><div class="t">Metadata-only capture</div><div class="d">No screenshots or keylogging — titles, attendees, duration only</div></div>
+          <div class="switch on" onclick="toggleSet(this,'Metadata-only capture')"></div>
+        </div>
+        <div class="set">
+          <div class="txt"><div class="t">Auto-delete private items locally</div><div class="d">Activities marked private are permanently deleted after 7 days</div></div>
+          <div class="switch on" onclick="toggleSet(this,'Auto-delete of private items')"></div>
+        </div>
+        <div class="set">
+          <div class="txt"><div class="t">Data retention period</div><div class="d">Raw activity data (beyond approved billing records) purged after 90 days</div></div>
+          <div class="switch on" onclick="toggleSet(this,'90-day retention policy')"></div>
+        </div>
+        <div class="set">
+          <div class="txt"><div class="t">No customer data used for AI training</div><div class="d">Client data is never used to train models (contractually guaranteed)</div></div>
+          <div class="switch on" onclick="toggleSet(this,'Exclude data from AI training')"></div>
+        </div>
+      </div>
+
+      <div class="section-h serif">Audit log <span class="ln"></span> <span class="cnt">Immutable · chronological</span></div>
+      <div class="audit-list" id="auditList"></div>
+
+      <div class="disclaimer">
+        <span class="di">🛡</span>
+        <div><b>Why it matters</b> — 39% of legal professionals cite ethics &amp; data privacy as the biggest barrier to AI adoption. Every data access, share, and deletion is written to an immutable audit log that firm administrators can view and export at any time — lowering the trust barrier at pilot onboarding.</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="ti" id="toastIc">✓</span><span id="toastMsg"></span></div>
+
+<script>
+/* ================= DATA MODEL ================= */
+const MATTERS = {
+  acme:   {matter:'Acme Corp — M&A Advisory', client:'Acme Corporation', rate:400, code:'L120'},
+  globex: {matter:'Globex — Contract Review',  client:'Globex Inc.',       rate:380, code:'L210'},
+  initech:{matter:'Initech — Litigation',      client:'Initech Ltd.',      rate:420, code:'L330'},
+};
+
+const SOURCES = {
+  email:{ic:'✉',cls:'src-email',name:'Email (Outlook)'},
+  cal:  {ic:'▦',cls:'src-cal',  name:'Calendar (Google)'},
+  doc:  {ic:'📄',cls:'src-doc', name:'Document edit (Word)'},
+  call: {ic:'🎥',cls:'src-call',name:'Video call (Zoom)'},
+  voice:{ic:'🎙',cls:'src-voice',name:'Voice memo'},
+};
+
+let captures = [
+  {id:1,src:'call',title:'Acme Corp — deal structure call (Zoom)',meta:'3 attendees · 2:00–3:30 PM',min:90,matter:'acme',conf:96,tags:['Meeting','Due diligence'],share:'share',detail:'Zoom call · attendees: J. Hartwell + 2 Acme counsel · title "Acquisition structure"'},
+  {id:2,src:'email',title:'Globex — revised terms reply thread',meta:'4 emails · 9:12–9:48 AM',min:36,matter:'globex',conf:88,tags:['Email','Contract review'],share:'share',detail:'Outlook thread of 4 · subject "RE: Supply Agreement v2" · counterparty domain globex.com'},
+  {id:3,src:'doc',title:'Initech — drafting Answer (Brief_v3.docx)',meta:'2 edit sessions · 4:05–5:20 PM',min:75,matter:'initech',conf:91,tags:['Drafting','Litigation'],share:'share',detail:'Word file Brief_v3.docx · 2 edit sessions · folder /Matters/Initech/Litigation'},
+  {id:4,src:'voice',title:'Client call memo — scheduling',meta:'1m 24s audio · 11:30 AM',min:18,matter:'acme',conf:64,tags:['Call','Scheduling'],share:'share',detail:'Voice memo 84s · auto-transcribed · keywords "Acme, next meeting, DD timeline"'},
+];
+let dismissed = new Set();
+
+let entries = [
+  {id:101,date:'Tue, May 21',min:108,matter:'globex',code:'L210',
+   narrative:'Reviewed and proposed revisions to the limitation-of-liability clause (§3) of the Globex Inc. supply agreement; handled multiple email exchanges with opposing counsel regarding clause negotiation.',
+   src:[{t:'doc',d:'Supply_Agreement_v2.docx — 68 min editing'},{t:'email',d:'5-message negotiation thread — 40 min'}],conf:90},
+  {id:102,date:'Mon, May 20',min:150,matter:'acme',code:'L120',
+   narrative:'Analyzed target-company financial due-diligence materials for the Acme Corporation acquisition; prepared an internal memo on deal structure and held a client call.',
+   src:[{t:'doc',d:'Financial DD review — 95 min'},{t:'call',d:'Client call — 55 min'}],conf:93},
+  {id:103,date:'Wed, May 22',min:90,matter:'initech',code:'L330',
+   narrative:'Drafted the Answer to the complaint on behalf of Initech Ltd.; organized facts by cause of action and researched supporting case law.',
+   src:[{t:'doc',d:'Brief_v3.docx — 75 min drafting'},{t:'cal',d:'Matter-review block — 15 min'}],conf:91},
+];
+let entryCounter = 200;
+let openXai = new Set();
+
+const NAR_TEMPLATES = {
+  concise:{
+    acme:'Acme M&A — deal-structure review and client call.',
+    globex:'Globex — contract-clause review and email negotiation with counterparty.',
+    initech:'Initech — drafted Answer and reviewed case law.',
+  },
+  detail:{
+    acme:'In connection with the Acme Corporation acquisition, conducted a detailed analysis of the target\'s financial due-diligence materials and assessed the tax and legal implications of alternative deal structures (asset vs. stock purchase); prepared an internal structuring memo and discussed key issues with the client via video conference.',
+    globex:'Closely reviewed the limitation-of-liability clause (§3) and indemnification clause (§7) of the Globex Inc. supply agreement to identify language unfavorable to the client and drafted proposed revisions; conducted multiple email negotiations with opposing counsel on those clauses.',
+    initech:'On behalf of Initech Ltd., drafted the Answer to the complaint; organized the factual record by cause of action and researched case law supporting the defenses asserted.',
+  },
+  polite:{
+    acme:'To advance the Acme Corporation acquisition, we reviewed the financial due-diligence materials and prepared our recommendation on the optimal deal structure for the client\'s consideration.',
+    globex:'We reviewed the key clauses of the Globex Inc. supply agreement, prepared proposed revisions to the provisions requiring protection, and diligently conducted the related negotiations with the counterparty.',
+    initech:'On behalf of Initech Ltd., we prepared the draft Answer and thoroughly researched the relevant case law to strengthen the asserted defenses.',
+  },
+};
+
+const INTEGRATIONS = [
+  {nm:'Clio',cat:'Practice Management',col:'#1c4fa0',ab:'Cl',on:true,sync:true,desc:'Two-way sync of matters, clients, and rates. Approved time flows straight into Clio billing.'},
+  {nm:'PracticePanther',cat:'Practice Management',col:'#6b3fa0',ab:'PP',on:true,sync:true,desc:'Matter/contact mapping and two-way time-entry sync.'},
+  {nm:'NetDocuments',cat:'Document Mgmt',col:'#0a8f5b',ab:'ND',on:false,sync:false,desc:'Auto-match document edits to matters for time capture.'},
+  {nm:'Outlook',cat:'Email · Calendar',col:'#c0504d',ab:'Ol',on:true,sync:true,desc:'Add-in for capturing email & calendar metadata.'},
+  {nm:'Gmail / Workspace',cat:'Email · Calendar',col:'#3a7bd5',ab:'Gm',on:true,sync:true,desc:'Capture Gmail, Google Calendar, and Docs activity.'},
+  {nm:'QuickBooks',cat:'Accounting',col:'#2ca01c',ab:'QB',on:false,sync:false,desc:'Push invoices & payments to accounting (no lock-in).'},
+  {nm:'Xero',cat:'Accounting',col:'#13b5ea',ab:'Xe',on:false,sync:false,desc:'Accounting sync for multi-jurisdiction firms.'},
+  {nm:'Zoom / Teams',cat:'Meetings',col:'#7b5ea7',ab:'Zm',on:true,sync:true,desc:'Auto-capture meeting duration & attendee metadata.'},
+  {nm:'LEDES e-Billing',cat:'Billing Export',col:'#b8893b',ab:'LE',on:true,sync:true,desc:'Export invoices in LEDES 1998B / 2.0 format.'},
+  {nm:'Contract Analysis',cat:'AI Module',col:'#5b6470',ab:'CA',on:false,sync:false,addon:true,desc:'Optional add-on: clause extraction & contract summary. Off by default to keep the core lean.'},
+];
+
+const AUDIT = [
+  {tm:'May 23, 4:42 PM',ev:'<b>J. Hartwell</b> edited the narrative of timesheet entry #102',who:'Attorney · web · IP 71.x',tag:'edit',lbl:'EDIT'},
+  {tm:'May 23, 4:40 PM',ev:'<b>J. Hartwell</b> approved activity #1 (Acme Zoom) as <b>Shared</b> → added to timesheet',who:'Attorney · web · IP 71.x',tag:'share',lbl:'SHARE'},
+  {tm:'May 23, 11:31 AM',ev:'Activity #4 (voice memo) set to <b>Private</b> — excluded from billing, deletion scheduled (7 days)',who:'Attorney · desktop app',tag:'priv',lbl:'PRIVATE'},
+  {tm:'May 22, 5:22 PM',ev:'Document-edit activity auto-captured (Brief_v3.docx) — metadata only',who:'Background capture',tag:'edit',lbl:'CAPTURE'},
+  {tm:'May 22, 9:48 AM',ev:'4 recurring email messages auto-grouped into one entry',who:'AI engine',tag:'edit',lbl:'AI'},
+  {tm:'May 21, 10:05 AM',ev:'<b>M. Crane (Partner)</b> exported the firm-wide audit log',who:'Partner · web',tag:'edit',lbl:'EXPORT'},
+  {tm:'May 21, 9:02 AM',ev:'Activity #9 (personal calendar event) <b>deleted</b> — original permanently purged',who:'Attorney · web',tag:'del',lbl:'DELETE'},
+];
+
+const RBAC = [
+  {perm:'Capture & approve own time',a:true,p:true,b:false},
+  {perm:'Edit billing narratives',a:true,p:true,b:true},
+  {perm:'View firm-wide timesheets',a:false,p:true,b:true},
+  {perm:'Generate & export invoices',a:false,p:true,b:true},
+  {perm:'Manage integrations & API keys',a:false,p:true,b:false},
+  {perm:'View / export audit log',a:false,p:true,b:true},
+  {perm:'Configure retention & privacy policy',a:false,p:true,b:false},
+];
+let currentRole='Attorney';
+
+/* ================= HELPERS ================= */
+const fmtH = m => (m/60).toFixed(1);
+const CUR = {USD:{s:'$',r:1,d:0},GBP:{s:'£',r:0.79,d:0},EUR:{s:'€',r:0.92,d:0},KRW:{s:'₩',r:1380,d:0}};
+function money(usd,cur){const c=CUR[cur||'USD'];const v=usd*c.r;return c.s+v.toLocaleString('en-US',{maximumFractionDigits:c.d});}
+function amount(min,rate){return Math.round(min/60*rate);}
+
+function showToast(msg,ic){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIc').textContent=ic||'✓';
+  t.classList.add('show');
+  clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function setLang(l,btn){
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function langSoon(l){ showToast(l+' UI & narratives — multilingual engine ready, rolling out for APAC launch','🌐'); }
+
+/* ================= ROLE (RBAC) ================= */
+function setRole(r){
+  currentRole=r;
+  document.getElementById('roleLabel').textContent='Hartwell & Crane LLP · '+r;
+  renderRbac();
+  showToast('Now viewing as: '+r+' — permissions applied','🛡');
+}
+function renderRbac(){
+  document.getElementById('rbacCurr').textContent='Viewing as: '+currentRole;
+  const cols=[['Attorney','a'],['Partner','p'],['Billing Admin','b']];
+  let html='<thead><tr><th>Permission</th>'+cols.map(c=>`<th class="c">${c[0]}</th>`).join('')+'</tr></thead><tbody>';
+  RBAC.forEach(row=>{
+    html+='<tr>'+`<td>${row.perm}</td>`+cols.map(c=>`<td class="c ${row[c[1]]?'yes':'no'}">${row[c[1]]?'✓':'—'}</td>`).join('')+'</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('rbacTable').innerHTML=html;
+}
+
+/* ================= NAV ================= */
+const TITLES={
+  dashboard:['Dashboard','Week of May 26, 2026 · Tracking billable-time leakage in real time'],
+  capture:['AI Time Capture','Review AI-captured activities, set sharing, and approve'],
+  timesheet:['Timesheet','Review, edit, and approve AI narratives — and see the rationale'],
+  invoice:['Invoicing','Auto-generate invoice drafts from approved entries'],
+  pilot:['Pilot Report','Quantify recovery vs. baseline for conversion & reference use'],
+  integrations:['Integrations','Connect your existing PMS, accounting, and document systems'],
+  security:['Security & Audit','Compliance, RBAC, privacy settings, and an immutable audit log'],
+};
+document.getElementById('nav').addEventListener('click',e=>{
+  const a=e.target.closest('a'); if(!a)return;
+  document.querySelectorAll('#nav a').forEach(x=>x.classList.remove('active'));
+  a.classList.add('active');
+  const v=a.dataset.view;
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById(v).classList.add('active');
+  document.getElementById('pageTitle').textContent=TITLES[v][0];
+  document.getElementById('pageSub').textContent=TITLES[v][1];
+  if(v==='invoice')renderInvoice();
+  if(v==='integrations')renderIntegrations();
+  if(v==='security'){renderRbac();renderAudit();}
+});
+
+/* ================= CHART ================= */
+function renderChart(){
+  const data=[
+    {d:'Mon',billed:7.2,gap:0.4},{d:'Tue',billed:6.1,gap:1.8},{d:'Wed',billed:8.3,gap:0.2},
+    {d:'Thu',billed:5.4,gap:0.9},{d:'Fri',billed:6.8,gap:1.1},{d:'Sat',billed:1.2,gap:0},{d:'Sun',billed:0.4,gap:0},
+  ];
+  const max=10;
+  document.getElementById('chart').innerHTML=data.map(x=>`
+    <div class="bar-col">
+      <div class="bar-stack">
+        ${x.gap?`<div class="bar gap" style="height:${x.gap/max*100}%" title="Gap ${x.gap}h"></div>`:''}
+        <div class="bar billed" style="height:${x.billed/max*100}%" title="Billed ${x.billed}h"></div>
+      </div>
+      <div class="bar-lbl">${x.d}</div>
+    </div>`).join('');
+}
+
+/* ================= CAPTURE FEED ================= */
+function renderCapture(){
+  const live=captures.filter(c=>!dismissed.has(c.id) && c.share!=='private');
+  document.getElementById('capBadge').textContent=live.length;
+  document.getElementById('capCount').textContent=`${live.length} awaiting review`;
+  const feed=document.getElementById('captureFeed');
+  if(captures.length===0){feed.innerHTML='<div class="empty"><div class="e-ic">✓</div><p>All activities reviewed. Try simulating a new one.</p></div>';return;}
+  feed.innerHTML=captures.map(c=>{
+    const s=SOURCES[c.src], m=MATTERS[c.matter];
+    const dis=dismissed.has(c.id);
+    const isPriv=c.share==='private';
+    const confCls=c.conf>=85?'':'mid';
+    return `<div class="capture-card ${dis?'dismissed':''} ${isPriv?'private':''}">
+      <div class="cap-top">
+        <div class="src-ic ${s.cls}">${s.ic}</div>
+        <div class="cap-meta">
+          <div class="cap-title">${c.title}</div>
+          <div class="cap-sub"><b>${s.name}</b><span>${c.meta}</span></div>
+        </div>
+        <div class="cap-dur">${fmtH(c.min)}h<small>${c.min} min</small></div>
+      </div>
+      <div class="match">
+        <span class="ai">✦ AI auto-match</span>
+        <div><span class="matter">${m.matter}</span> · <span class="client">${m.client}</span></div>
+        <div class="conf">
+          <span style="font-size:11px;color:var(--muted)">Confidence</span>
+          <div class="conf-bar"><div class="conf-fill" style="width:${c.conf}%;background:${c.conf>=85?'var(--green)':'var(--gold)'}"></div></div>
+          <span class="conf-pct ${confCls}">${c.conf}%</span>
+        </div>
+      </div>
+      <div class="tags">
+        ${c.tags.map(t=>`<span class="tag">#${t}</span>`).join('')}
+        <span class="tag code">Code ${m.code}</span>
+      </div>
+      <div class="consent">
+        <span class="lk">🔒 Sharing scope — Private excludes from billing + local auto-delete</span>
+        <div class="seg">
+          <button class="${c.share==='share'?'on share':''}" onclick="setShare(${c.id},'share')">Share</button>
+          <button class="${c.share==='private'?'on priv':''}" onclick="setShare(${c.id},'private')">Private</button>
+        </div>
+      </div>
+      ${dis?'<div style="margin-top:12px;font-size:12px;color:var(--muted)">✕ Dismissed — excluded from billing</div>':
+      isPriv?'<div style="margin-top:12px;font-size:12px;color:var(--gold);font-weight:600">🔒 Private — excluded from billing and permanently deleted in 7 days</div>':
+      `<div class="cap-actions">
+        <button class="btn btn-primary btn-sm" onclick="approveCapture(${c.id})">✓ Approve → timesheet</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Screen to reassign the matter','✎')">Change matter</button>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-sm" onclick="dismissCapture(${c.id})">Dismiss</button>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+function setShare(id,mode){
+  const c=captures.find(x=>x.id===id); if(!c)return;
+  c.share=mode; renderCapture();
+  showToast(mode==='private'?'Set to Private — excluded from billing, deletion scheduled':'Set to Share — you can review and approve it', mode==='private'?'🔒':'✓');
+}
+function approveCapture(id){
+  const c=captures.find(x=>x.id===id); if(!c)return;
+  const m=MATTERS[c.matter];
+  entries.unshift({id:entryCounter++,date:'Thu, May 23',min:c.min,matter:c.matter,code:m.code,
+    narrative:NAR_TEMPLATES.detail[c.matter],
+    src:[{t:c.src,d:c.detail||'auto-captured activity'}],conf:c.conf});
+  captures=captures.filter(x=>x.id!==id);
+  renderCapture(); renderTimesheet();
+  showToast(`Approved · +${fmtH(c.min)}h to timesheet (+${money(amount(c.min,m.rate),'USD')})`,'✓');
+}
+function dismissCapture(id){dismissed.add(id);renderCapture();}
+function simulateCapture(){
+  const samples=[
+    {src:'email',title:'Acme — opposing counsel reply review',meta:'2 emails · just now',min:24,matter:'acme',conf:82,tags:['Email','Due diligence'],detail:'2 Outlook emails · subject "RE: Due diligence request"'},
+    {src:'doc',title:'Globex — drafting revised redline (Redline_v2.docx)',meta:'1 edit session · just now',min:42,matter:'globex',conf:90,tags:['Drafting','Contract review'],detail:'Word Redline_v2.docx — 42 min editing'},
+    {src:'call',title:'Initech — client strategy call (Teams)',meta:'2 attendees · just now',min:55,matter:'initech',conf:93,tags:['Meeting','Litigation'],detail:'Teams call 55 min · 2 attendees'},
+  ];
+  const s=samples[Math.floor(Math.random()*samples.length)];
+  const id=Date.now();
+  captures.unshift({...s,id,share:'share'});
+  renderCapture();
+  document.querySelector('#nav a[data-view="capture"]').click();
+  showToast('New activity captured in the background — awaiting review','⦿');
+}
+
+/* ================= TIMESHEET ================= */
+function renderTimesheet(){
+  document.getElementById('tsCount').textContent=`${entries.length} entries`;
+  const list=document.getElementById('tsList');
+  if(entries.length===0){list.innerHTML='<div class="empty"><div class="e-ic">▤</div><p>No approved entries yet. Approve activities in AI Time Capture.</p></div>';return;}
+  const groups={};
+  entries.forEach(e=>{(groups[e.matter]=groups[e.matter]||[]).push(e);});
+  list.innerHTML=Object.entries(groups).map(([mk,es])=>{
+    const m=MATTERS[mk];
+    const totMin=es.reduce((a,b)=>a+b.min,0);
+    const totAmt=es.reduce((a,b)=>a+amount(b.min,m.rate),0);
+    return `<div class="ts-group">
+      <div class="ts-group-h">
+        <span class="mn">${m.matter}</span>
+        <span class="cl">· ${m.client} · @${money(m.rate,'USD')}/h</span>
+        <span class="tot">${fmtH(totMin)}h · ${money(totAmt,'USD')}</span>
+      </div>
+      ${es.map(e=>`
+        <div class="ts-entry">
+          <div class="ts-entry-top">
+            <span class="dt">${e.date}</span>
+            <span class="tag code">${e.code}</span>
+            <span class="dur">${fmtH(e.min)}h</span>
+            <span class="amt">${money(amount(e.min,m.rate),'USD')}</span>
+          </div>
+          <div class="narrative" contenteditable="true" spellcheck="false" data-id="${e.id}"
+               oninput="updateNarrative(${e.id},this.innerText)">${e.narrative}</div>
+          <div class="nar-tools">
+            <span class="lab">✦ Regenerate narrative:</span>
+            <button class="chip gen" onclick="regen(${e.id},'concise')">Concise</button>
+            <button class="chip gen" onclick="regen(${e.id},'detail')">Detailed</button>
+            <button class="chip gen" onclick="regen(${e.id},'polite')">Formal</button>
+            <button class="chip xai" onclick="toggleXai(${e.id})">✦ AI rationale ${openXai.has(e.id)?'▲':'▼'}</button>
+          </div>
+          ${openXai.has(e.id)?renderXai(e):''}
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function renderXai(e){
+  const srcLabels={email:'Email',cal:'Calendar',doc:'Document',call:'Video call',voice:'Voice'};
+  return `<div class="xai-panel">
+    <div class="xh">✦ How was this narrative generated? (AI explainability)</div>
+    <div class="xai-row"><span class="k">Source activities</span><span class="v">${(e.src||[]).map(s=>`<span class="xai-src">${SOURCES[s.t]?SOURCES[s.t].ic:'•'} ${srcLabels[s.t]||s.t} — ${s.d}</span>`).join('')}</span></div>
+    <div class="xai-row"><span class="k">Match confidence</span><span class="v">${e.conf||90}% — auto-matched on matter keywords, attendees, and file paths</span></div>
+    <div class="xai-row"><span class="k">Models used</span><span class="v">Premium domain-tuned LLM for the narrative · lightweight model for activity classification &amp; tagging (quality-first, cost-optimized)</span></div>
+    <div class="xai-row"><span class="k">Method</span><span class="v">Activity metadata converted into a billing description — no source text reproduced verbatim</span></div>
+    <div class="xai-note">⚖️ This explanation is for administrative support only and is <b>not legal advice.</b> Every narrative is reviewed, edited, and approved by an attorney before it appears on an invoice.</div>
+  </div>`;
+}
+function toggleXai(id){ if(openXai.has(id))openXai.delete(id); else openXai.add(id); renderTimesheet(); }
+function updateNarrative(id,txt){const e=entries.find(x=>x.id===id);if(e)e.narrative=txt;}
+function regen(id,style){
+  const e=entries.find(x=>x.id===id); if(!e)return;
+  e.narrative=NAR_TEMPLATES[style][e.matter]||e.narrative;
+  renderTimesheet();
+  const labels={concise:'Concise',detail:'Detailed',polite:'Formal'};
+  showToast(`AI regenerated the narrative in "${labels[style]}" tone`,'✦');
+}
+
+/* ================= INVOICE ================= */
+const JUR_TAX={'us-ca':0,'us-ny':0,'uk':20,'kr':10};
+const JUR_CUR={'us-ca':'USD','us-ny':'USD','uk':'GBP','kr':'KRW'};
+function applyJurisdiction(){
+  const j=document.getElementById('invJur').value;
+  document.getElementById('invTax').value=JUR_TAX[j];
+  document.getElementById('invCurrency').value=JUR_CUR[j];
+  renderInvoice();
+  const noteMap={'us-ca':'No statewide tax on legal services (CA)','us-ny':'No sales tax on legal services (NY)','uk':'VAT 20% applied (UK)','kr':'VAT 10% applied (KR)'};
+  showToast('Jurisdiction rule applied — '+noteMap[j],'⚖️');
+}
+function fillInvClients(){
+  const sel=document.getElementById('invClient');
+  const mks=[...new Set(entries.map(e=>e.matter))];
+  sel.innerHTML=mks.map(mk=>`<option value="${mk}">${MATTERS[mk].client} — ${MATTERS[mk].matter}</option>`).join('')
+    || '<option value="">No approved entries</option>';
+}
+function renderInvoice(){
+  fillInvClients();
+  const mk=document.getElementById('invClient').value;
+  const area=document.getElementById('invoiceArea');
+  const roiArea=document.getElementById('invRoi');
+  if(!mk){area.innerHTML='<div class="empty"><div class="e-ic">▦</div><p>Approve entries in the timesheet first.</p></div>';roiArea.innerHTML='';return;}
+  const cur=document.getElementById('invCurrency').value;
+  const disc=Math.min(50,Math.max(0,+document.getElementById('invDiscount').value||0));
+  const tax=Math.min(25,Math.max(0,+document.getElementById('invTax').value||0));
+  const m=MATTERS[mk];
+  const es=entries.filter(e=>e.matter===mk);
+  const subtotal=es.reduce((a,e)=>a+amount(e.min,m.rate),0);
+  const discAmt=Math.round(subtotal*disc/100);
+  const afterDisc=subtotal-discAmt;
+  const taxAmt=Math.round(afterDisc*tax/100);
+  const total=afterDisc+taxAmt;
+  const totMin=es.reduce((a,e)=>a+e.min,0);
+
+  area.innerHTML=`<div class="invoice">
+    <div class="inv-head">
+      <div>
+        <div class="logo">TALLORA<span class="dot">.</span></div>
+        <div style="font-size:11px;color:#aebccd;margin-top:6px">Hartwell &amp; Crane LLP · New York, NY</div>
+      </div>
+      <div class="meta">
+        <div><b>INVOICE #INV-2026-0${Math.floor(Math.random()*90)+10}</b></div>
+        <div>Issued: May 26, 2026</div>
+        <div>Period: May 1 – 26, 2026</div>
+      </div>
+    </div>
+    <div class="inv-to">
+      <div><div class="lab">Bill to</div><b>${m.client}</b><br>${m.matter}</div>
+      <div style="text-align:right"><div class="lab">Attorney of record</div><b>J. Hartwell, Esq.</b><br>@${money(m.rate,cur)}/hr</div>
+    </div>
+    <table class="lines">
+      <thead><tr><th>Date</th><th>Description (AI-generated)</th><th style="text-align:center">Code</th><th style="text-align:right">Hours</th><th style="text-align:right">Amount</th></tr></thead>
+      <tbody>
+        ${es.map(e=>`<tr>
+          <td style="white-space:nowrap;color:var(--muted)">${e.date}</td>
+          <td class="desc">${e.narrative}</td>
+          <td style="text-align:center" class="code">${e.code}</td>
+          <td class="num">${fmtH(e.min)}h</td>
+          <td class="num">${money(amount(e.min,m.rate),cur)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="inv-sum">
+      <table>
+        <tr><td class="l">Subtotal (${fmtH(totMin)} hrs)</td><td>${money(subtotal,cur)}</td></tr>
+        ${disc>0?`<tr><td class="l">Discount (${disc}%)</td><td style="color:var(--red)">−${money(discAmt,cur)}</td></tr>`:''}
+        ${tax>0?`<tr><td class="l">Tax / VAT (${tax}%)</td><td>${money(taxAmt,cur)}</td></tr>`:''}
+        <tr class="total"><td class="l">Total (${cur})</td><td>${money(total,cur)}</td></tr>
+      </table>
+    </div>
+    <div class="inv-foot">
+      ⚖️ This invoice is based on time records reviewed and approved by the attorney of record. TALLORA does not provide legal advice; billing narratives are AI-assisted and attorney-verified. · LEDES 1998B compatible · Payment terms: net 30.
+    </div>
+  </div>`;
+
+  const savedNarrativeHrs=(es.length*0.25).toFixed(1);
+  roiArea.innerHTML=`
+    <div class="section-h serif">The ROI this invoice proves <span class="ln"></span></div>
+    <div class="roi">
+      <div class="roi-card"><div class="v">${fmtH(totMin)}h</div><div class="l">Billable hours recovered by AI</div></div>
+      <div class="roi-card"><div class="v">${savedNarrativeHrs}h</div><div class="l">Narrative-drafting time saved (vs. manual)</div></div>
+      <div class="roi-card hl"><div class="v">${money(total,cur)}</div><div class="l">Billable amount secured via automation</div></div>
+    </div>`;
+}
+
+/* ================= INTEGRATIONS ================= */
+function renderIntegrations(){
+  const on=INTEGRATIONS.filter(i=>i.on).length;
+  document.getElementById('intCount').textContent=`${on}/${INTEGRATIONS.length} connected`;
+  document.getElementById('intGrid').innerHTML=INTEGRATIONS.map((i,idx)=>`
+    <div class="int ${i.addon?'addon':''}">
+      <div class="int-top">
+        <div class="int-logo" style="background:${i.col}">${i.ab}</div>
+        <div><div class="int-nm">${i.nm}${i.addon?'<span class="opt">ADD-ON</span>':''}</div><div class="int-cat">${i.cat}</div></div>
+      </div>
+      <div class="int-desc">${i.desc}</div>
+      <div class="int-foot">
+        <span class="sync ${i.on?'on':'off'}">${i.on?(i.sync?'⇄ Two-way sync':'Connected'):(i.addon?'Optional':'Not connected')}</span>
+        <div class="switch ${i.on?'on':''}" onclick="toggleInt(${idx})"></div>
+      </div>
+    </div>`).join('');
+}
+function toggleInt(idx){
+  const i=INTEGRATIONS[idx]; i.on=!i.on; i.sync=i.on;
+  renderIntegrations();
+  if(i.addon){ showToast(`${i.nm} ${i.on?'enabled — billed as an optional add-on':'disabled'}`, i.on?'➕':'✕'); return; }
+  showToast(`${i.nm} ${i.on?'connected — two-way sync active':'disconnected'}`, i.on?'⇄':'✕');
+}
+
+/* ================= AUDIT & SECURITY ================= */
+function renderAudit(){
+  document.getElementById('auditList').innerHTML=AUDIT.map(a=>`
+    <div class="audit-row">
+      <span class="tm">${a.tm}</span>
+      <span class="ev">${a.ev}<div class="who">${a.who}</div></span>
+      <span class="badge2 b-${a.tag}">${a.lbl}</span>
+    </div>`).join('');
+}
+function toggleSet(el,name){
+  el.classList.toggle('on');
+  const on=el.classList.contains('on');
+  showToast(`${name} ${on?'enabled':'disabled'}`, on?'✓':'✕');
+}
+
+/* ================= INIT ================= */
+renderChart();
+renderCapture();
+renderTimesheet();
+renderInvoice();
+renderIntegrations();
+renderRbac();
+renderAudit();
+</script>
+</body>
+</html>
